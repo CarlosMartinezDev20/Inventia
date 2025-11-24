@@ -64,12 +64,7 @@ class AuthManager {
     });
     if (passwordInput) passwordInput.type = 'password';
 
-    // Limpiar errores e íconos
-    const errorDiv = document.getElementById('login-error');
-    if (errorDiv) {
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-    }
+    // Limpiar íconos de contraseña
     const eyeIcon = document.getElementById('eye-icon');
     const eyeOffIcon = document.getElementById('eye-off-icon');
     if (eyeIcon) eyeIcon.style.display = 'block';

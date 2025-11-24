@@ -22,7 +22,7 @@ const productsView = {
           </div>
         </div>
         <div class="page-actions">
-          ${auth.canManage() ? '<button class="btn btn-primary" id="add-product-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Nuevo Producto</button>' : ''}
+          ${permissions.canPerformAction('products', 'create') ? '<button class="btn btn-primary" id="add-product-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Nuevo Producto</button>' : ''}
         </div>
       </div>
 
@@ -268,7 +268,7 @@ const productsView = {
                 <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
               </svg>
             </button>
-            ${auth.canManage() ? `
+            ${permissions.canPerformAction('products', 'update') ? `
               <button class="action-btn edit" data-action="edit" title="Editar">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -276,7 +276,7 @@ const productsView = {
                 </svg>
               </button>
             ` : ''}
-            ${auth.isAdmin() ? `
+            ${permissions.canPerformAction('products', 'delete') ? `
               <button class="action-btn delete" data-action="delete" title="Eliminar">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -637,7 +637,12 @@ const productsView = {
 
     try {
       await api.deleteProduct(id);
-      utils.showToast('Producto eliminado correctamente', 'success');
+      utils.showToast(
+        'El producto ha sido eliminado permanentemente del sistema',
+        'success',
+        'Producto eliminado',
+        4000
+      );
       await this.loadProducts();
     } catch (error) {
       console.error('Error deleting product:', error);

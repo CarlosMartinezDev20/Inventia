@@ -42,8 +42,11 @@ class App {
         const nameEl = document.getElementById('user-name');
         const roleEl = document.getElementById('user-role');
         if (nameEl) nameEl.textContent = user.fullName || '';
-        if (roleEl) roleEl.textContent = user.role || '';
+        if (roleEl) roleEl.textContent = permissions.getRoleLabel(user.role) || user.role;
       }
+
+      // Aplicar permisos al sidebar
+      permissions.applyViewPermissions();
 
       // Navegación
       const hash = window.location.hash.slice(1);
@@ -147,17 +150,22 @@ class App {
   async handleLogin(form) {
     const email = form.email.value;
     const password = form.password.value;
-    const errorDiv = document.getElementById('login-error');
     const submitBtn = form.querySelector('button[type="submit"]');
     const emailInput = form.email;
     const passwordInput = form.password;
+
+    // Validación básica
+    if (!email || !password) {
+      utils.showToast('Por favor completa todos los campos', 'warning', 'Campos requeridos');
+      return;
+    }
 
     // Deshabilitar temporalmente
     submitBtn.disabled = true;
     emailInput.disabled = true;
     passwordInput.disabled = true;
-    submitBtn.textContent = 'Iniciando sesión...';
-    if (errorDiv) errorDiv.style.display = 'none';
+    const originalText = submitBtn.textContent;
+    submitBtn.innerHTML = '<div class="btn-spinner"></div> Iniciando sesión...';
 
     try {
       await auth.login(email, password);
@@ -168,7 +176,15 @@ class App {
         const roleEl = document.getElementById('user-role');
         if (nameEl) nameEl.textContent = user.fullName || '';
         if (roleEl) roleEl.textContent = user.role || '';
-        utils.showToast(`¡Bienvenido, ${user.fullName}!`, 'success');
+        
+        // Mensaje de bienvenida mejorado
+        const greeting = this.getGreeting();
+        utils.showToast(
+          `Has iniciado sesión correctamente como ${user.role}`,
+          'success',
+          `${greeting}, ${user.fullName}!`,
+          5000
+        );
       }
 
       // Resetear formulario antes de cambiar pantalla
@@ -179,19 +195,52 @@ class App {
       router.navigate('dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      if (errorDiv) {
-        errorDiv.textContent =
-          error?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
-        errorDiv.style.display = 'block';
+      
+      // Manejar diferentes tipos de errores
+      let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+      let errorTitle = 'Error de autenticación';
+      
+      if (error?.message) {
+        const msg = error.message.toLowerCase();
+        
+        if (msg.includes('unauthorized') || msg.includes('invalid credentials') || msg.includes('credenciales inválidas')) {
+          errorMessage = 'Correo o contraseña incorrectos. Por favor verifica tus datos.';
+          errorTitle = 'Credenciales incorrectas';
+        } else if (msg.includes('not found') || msg.includes('no encontrado')) {
+          errorMessage = 'No existe una cuenta con este correo electrónico.';
+          errorTitle = 'Usuario no encontrado';
+        } else if (msg.includes('network') || msg.includes('conexión')) {
+          errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+          errorTitle = 'Error de conexión';
+        } else if (msg.includes('timeout')) {
+          errorMessage = 'La solicitud tardó demasiado. Intenta nuevamente.';
+          errorTitle = 'Tiempo agotado';
+        } else {
+          errorMessage = error.message;
+        }
       }
-      emailInput.focus();
+      
+      // Solo mostrar toast de error (sin mensaje en el formulario)
+      utils.showToast(errorMessage, 'error', errorTitle, 6000);
+      
+      // Limpiar contraseña y enfocar
+      passwordInput.value = '';
+      passwordInput.focus();
     } finally {
       // Rehabilitar siempre
       submitBtn.disabled = false;
       emailInput.disabled = false;
       passwordInput.disabled = false;
-      submitBtn.textContent = 'Iniciar Sesión';
+      submitBtn.textContent = originalText;
     }
+  }
+
+  // Obtener saludo según hora del día
+  getGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return '¡Buenos días';
+    if (hour < 19) return '¡Buenas tardes';
+    return '¡Buenas noches';
   }
 
   // Registrar rutas

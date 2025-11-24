@@ -175,10 +175,20 @@ const suppliersView = {
     try {
       if (supplierId) {
         await api.updateSupplier(supplierId, data);
-        utils.showToast('Proveedor actualizado correctamente', 'success');
+        utils.showToast(
+          `Los datos de "${data.name}" han sido actualizados exitosamente`,
+          'success',
+          '¡Proveedor actualizado!',
+          5000
+        );
       } else {
         await api.createSupplier(data);
-        utils.showToast('Proveedor creado correctamente', 'success');
+        utils.showToast(
+          `El proveedor "${data.name}" ha sido agregado al sistema`,
+          'success',
+          '¡Proveedor creado!',
+          5000
+        );
       }
 
       document.getElementById('supplier-modal').remove();

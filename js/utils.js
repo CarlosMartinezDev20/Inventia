@@ -73,76 +73,146 @@ const utils = {
     return `${year}-${month}-${day}`;
   },
 
-  // Mostrar toast notification
-  showToast(message, type = 'info', title = '') {
+  // Mostrar toast notification mejorado
+  showToast(message, type = 'info', title = '', duration = null) {
     const container = document.getElementById('toast-container');
     
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast toast-${type}`;
     
     const icons = {
-      success: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      error: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M15 9L9 15M9 9L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-      info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      error: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      warning: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 9V13M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
     };
     
+    const autoDuration = duration || CONFIG.TOAST_DURATION;
+    
     toast.innerHTML = `
-      <div class="toast-icon ${type}">${icons[type] || icons.info}</div>
+      <div class="toast-icon toast-icon-${type}">${icons[type] || icons.info}</div>
       <div class="toast-content">
-        ${title ? `<div class="toast-title">${title}</div>` : ''}
-        <div class="toast-message">${message}</div>
+        ${title ? `<div class="toast-title">${utils.escapeHtml(title)}</div>` : ''}
+        <div class="toast-message">${utils.escapeHtml(message)}</div>
       </div>
+      <button class="toast-close" onclick="this.parentElement.remove()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
     `;
     
     container.appendChild(toast);
     
-    // Auto-remove después de 4 segundos
-    setTimeout(() => {
-      toast.style.animation = 'slideOut 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, CONFIG.TOAST_DURATION);
+    // Auto-remove después del tiempo especificado
+    const removeTimeout = setTimeout(() => {
+      if (toast.parentElement) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 200);
+      }
+    }, autoDuration);
+    
+    // Pausar auto-remove al hacer hover
+    toast.addEventListener('mouseenter', () => {
+      clearTimeout(removeTimeout);
+    });
+    
+    // Reanudar al salir del hover
+    toast.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(20px)';
+          setTimeout(() => toast.remove(), 200);
+        }
+      }, 1000);
+    });
   },
 
   // Confirmar acción
-  async confirm(message, title = '¿Estás seguro?') {
+  async confirm(message, title = '¿Estás seguro?', type = 'warning') {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
+      overlay.className = 'modal-overlay confirm-modal-overlay';
+      
+      const icons = {
+        danger: `
+          <svg class="confirm-icon confirm-icon-danger" width="56" height="56" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M15 9L9 15M9 9L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        `,
+        warning: `
+          <svg class="confirm-icon confirm-icon-warning" width="56" height="56" viewBox="0 0 24 24" fill="none">
+            <path d="M12 9V13M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64151 19.6871 1.81445 19.9905C1.98738 20.2939 2.23673 20.5467 2.53771 20.7239C2.83868 20.901 3.18084 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `
+      };
+      
+      const icon = type === 'danger' ? icons.danger : icons.warning;
       
       overlay.innerHTML = `
-        <div class="modal modal-sm">
-          <div class="modal-header">
-            <h3 class="modal-title">${title}</h3>
+        <div class="modal modal-sm confirm-modal">
+          <div class="modal-body confirm-modal-body">
+            <div class="confirm-icon-container">
+              ${icon}
+            </div>
+            <h3 class="confirm-title">${title}</h3>
+            <p class="confirm-message">${message}</p>
           </div>
-          <div class="modal-body">
-            <p>${message}</p>
-          </div>
-          <div class="modal-footer">
+          <div class="modal-footer confirm-modal-footer">
             <button class="btn btn-secondary" id="cancel-btn">Cancelar</button>
-            <button class="btn btn-danger" id="confirm-btn">Confirmar</button>
+            <button class="btn btn-danger" id="confirm-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M19 6V20C19 21.1046 18.1046 22 17 22H7C5.89543 22 5 21.1046 5 20V6M8 6V4C8 2.89543 8.89543 2 10 2H14C15.1046 2 16 2.89543 16 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Eliminar
+            </button>
           </div>
         </div>
       `;
       
       document.body.appendChild(overlay);
       
-      overlay.querySelector('#cancel-btn').addEventListener('click', () => {
-        overlay.remove();
-        resolve(false);
+      // Animación de entrada
+      requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        const modal = overlay.querySelector('.confirm-modal');
+        modal.style.animation = 'confirmModalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       });
       
-      overlay.querySelector('#confirm-btn').addEventListener('click', () => {
-        overlay.remove();
-        resolve(true);
-      });
+      const closeModal = (result) => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.remove();
+          resolve(result);
+        }, 150);
+      };
+      
+      overlay.querySelector('#cancel-btn').addEventListener('click', () => closeModal(false));
+      overlay.querySelector('#confirm-btn').addEventListener('click', () => closeModal(true));
       
       // Click fuera del modal
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.remove();
-          resolve(false);
-        }
+        if (e.target === overlay) closeModal(false);
       });
+      
+      // ESC key
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          closeModal(false);
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+      
+      // Focus en el botón de confirmar
+      setTimeout(() => {
+        overlay.querySelector('#confirm-btn').focus();
+      }, 100);
     });
   },
 
@@ -211,11 +281,11 @@ const utils = {
     return params;
   },
 
-  // Loading spinner
+  // Loading spinner minimalista
   showLoading(container) {
     container.innerHTML = `
-      <div class="loading">
-        <div class="spinner"></div>
+      <div class="loading-minimal">
+        <div class="spinner-minimal"></div>
       </div>
     `;
   },

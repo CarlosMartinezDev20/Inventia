@@ -4,7 +4,7 @@ const CONFIG = {
   API_BASE_URL: 'https://inventory-backend-v2.onrender.com',
   
   // Configuración de la app
-  APP_NAME: 'Sistema de Gestión de Inventario',
+  APP_NAME: 'Inventia',
   APP_VERSION: '1.0.0',
   
   // Configuración de paginación

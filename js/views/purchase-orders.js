@@ -166,7 +166,7 @@ const purchaseOrdersView = {
                 </div>
                 <div>
                   <label style="display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 6px;">Fecha Esperada</label>
-                  <input type="date" name="expectedAt" style="width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+                  <input type="date" name="expectedAt" min="${new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
                 </div>
               </div>
 
@@ -353,8 +353,13 @@ const purchaseOrdersView = {
     submitBtn.textContent = 'Guardando...';
 
     try {
-      await api.createPurchaseOrder(data);
-      utils.showToast('Orden creada correctamente', 'success');
+      const result = await api.createPurchaseOrder(data);
+      utils.showToast(
+        'La orden de compra ha sido creada exitosamente',
+        'success',
+        '¡Orden creada!',
+        4000
+      );
       document.getElementById('po-modal').remove();
       await this.loadOrders();
     } catch (error) {

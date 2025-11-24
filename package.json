@@ -1,7 +1,7 @@
 {
   "name": "inventory-frontend",
   "version": "1.0.0",
-  "description": "Sistema de Gestión de Inventario - Desktop App",
+  "description": "Inventia - Sistema de Gestión de Inventario",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -36,7 +36,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico"
@@ -58,6 +60,11 @@
   "type": "commonjs",
   "devDependencies": {
     "electron": "^39.1.1",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "electron-reload": "^2.0.0-alpha.1",
+    "nodemon": "^3.1.11"
+  },
+  "dependencies": {
+    "apexcharts": "^5.3.6"
   }
 }

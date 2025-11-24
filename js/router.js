@@ -32,6 +32,19 @@ class Router {
       const hash = window.location.hash.slice(1) || 'dashboard';
       const [path] = hash.split('?');
       
+      // Verificar permisos de acceso a la vista
+      if (path !== 'dashboard' && !permissions.canAccessView(path)) {
+        console.warn(`Access denied to view: ${path}`);
+        utils.showToast(
+          permissions.getErrorMessage('noViewAccess'),
+          'error',
+          'Acceso denegado'
+        );
+        // Redirigir al dashboard
+        this.navigate('dashboard');
+        return;
+      }
+      
       // Buscar la vista correspondiente
       const viewModule = this.routes[path] || this.routes['dashboard'];
       
@@ -43,15 +56,17 @@ class Router {
       // Actualizar navegación activa
       this.updateActiveNav(path);
       
-      // Renderizar la vista
+      // Renderizar la vista con loading minimalista
       const container = document.getElementById('view-container');
       if (!container) {
         console.error('View container not found');
         return;
       }
       
+      // Mostrar loading inmediatamente
       utils.showLoading(container);
       
+      // Renderizar contenido
       await viewModule.render(container);
       this.currentView = path;
       

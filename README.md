@@ -1,6 +1,6 @@
-# Sistema de Gestión de Inventario - Frontend Desktop
+# Inventia - Frontend Desktop
 
-Aplicación de escritorio construida con Electron, HTML, CSS y JavaScript vanilla para gestionar el inventario de productos.
+Aplicación de escritorio construida con Electron, HTML, CSS y JavaScript vanilla para gestionar el inventario de productos de forma profesional y eficiente.
 
 ## 🚀 Características
 

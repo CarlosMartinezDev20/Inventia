@@ -151,12 +151,18 @@ const salesOrdersView = {
           </div>
           <form id="so-form">
             <div class="modal-body">
-              <div style="margin-bottom: 24px;">
-                <label style="display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 6px;">Cliente *</label>
-                <select name="customerId" required style="width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; background: white;">
-                  <option value="">Seleccionar...</option>
-                  ${this.customers.map(c => `<option value="${c.id}">${utils.escapeHtml(c.name)}</option>`).join('')}
-                </select>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div>
+                  <label style="display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 6px;">Cliente *</label>
+                  <select name="customerId" required style="width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; background: white;">
+                    <option value="">Seleccionar...</option>
+                    ${this.customers.map(c => `<option value="${c.id}">${utils.escapeHtml(c.name)}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label style="display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 6px;">Fecha Esperada</label>
+                  <input type="date" name="expectedAt" min="${new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+                </div>
               </div>
 
               <div style="margin-bottom: 12px;">
@@ -354,8 +360,13 @@ const salesOrdersView = {
     }
 
     try {
-      await api.createSalesOrder(data);
-      utils.showToast('Orden creada correctamente', 'success');
+      const result = await api.createSalesOrder(data);
+      utils.showToast(
+        'La orden de venta ha sido creada exitosamente',
+        'success',
+        '¡Orden creada!',
+        4000
+      );
       document.getElementById('so-modal').remove();
       await this.loadOrders();
     } catch (error) {

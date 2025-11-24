@@ -2,61 +2,156 @@
 const dashboardView = {
   async render(container) {
     const currentUser = auth.getCurrentUser();
-    const greeting = this.getGreeting();
+    const greetingData = this.getGreeting();
+    const currentDate = this.getCurrentDate();
     
     container.innerHTML = `
-      <div style="margin-bottom: 32px;">
-        <h1 style="font-size: 24px; font-weight: 600; color: #111827; margin-bottom: 4px;">${greeting}, ${utils.escapeHtml(currentUser?.fullName || 'Usuario')}</h1>
-        <p style="font-size: 14px; color: #6b7280;">Resumen de tu inventario</p>
-      </div>
-
-      <div class="dashboard-stats-grid" id="stats-container">
-        <div class="loading">
-          <div class="spinner"></div>
+      <div class="dashboard-welcome">
+        <div class="welcome-content">
+          <div class="welcome-text">
+            <h1 class="welcome-title">
+              ${greetingData.icon}
+              ${greetingData.text}, ${utils.escapeHtml(currentUser?.fullName || 'Usuario')}
+            </h1>
+            <p class="welcome-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px; opacity: 0.6;">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              ${currentDate}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div class="dashboard-grid">
-        <div class="dashboard-card" style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-          <div style="padding: 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 2px;">Stock Bajo</h3>
-              <p style="font-size: 13px; color: #6b7280;">Productos que requieren atención</p>
+      <div class="dashboard-stats-modern" id="stats-container">
+        <div class="loading-minimal">
+          <div class="spinner-minimal"></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid-modern">
+        <!-- Fila 1: Gráfico grande de movimientos y Top Productos -->
+        <div class="dashboard-card-modern dashboard-card-large">
+          <div class="dashboard-card-header-modern">
+            <div class="card-header-content">
+              <div class="card-icon-header primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3V16C3 16.5304 3.21071 17.0391 3.58579 17.4142C3.96086 17.7893 4.46957 18 5 18H21"/>
+                  <path d="M18 9L13 14L9 10L3 16"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="card-title-modern">Movimientos de Inventario</h3>
+                <p class="card-subtitle-modern">Últimos 7 días</p>
+              </div>
             </div>
-            <button class="btn btn-sm btn-secondary" onclick="router.navigate('products')">Ver todos</button>
           </div>
-          <div style="padding: 16px;">
+          <div class="dashboard-card-content">
+            <div id="inventory-chart" style="min-height: 240px;">
+              <div class="loading-minimal">
+                <div class="spinner-minimal"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card-modern">
+          <div class="dashboard-card-header-modern">
+            <div class="card-header-content">
+              <div class="card-icon-header success">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="card-title-modern">Top Productos</h3>
+                <p class="card-subtitle-modern">Más vendidos</p>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-card-content">
+            <div id="top-products-chart" style="min-height: 240px;">
+              <div class="loading-minimal">
+                <div class="spinner-minimal"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fila 2: Estado de inventario (donut) -->
+        <div class="dashboard-card-modern">
+          <div class="dashboard-card-header-modern">
+            <div class="card-header-content">
+              <div class="card-icon-header info">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.21 15.89C20.5738 17.3945 19.5788 18.7202 18.3119 19.7513C17.045 20.7824 15.5447 21.4874 13.9424 21.8048C12.3401 22.1221 10.6844 22.0421 9.12012 21.5718C7.55585 21.1015 6.13351 20.2551 4.96931 19.1066C3.80511 17.958 2.93783 16.5428 2.44253 14.984C1.94723 13.4251 1.84094 11.7705 2.13393 10.1646C2.42691 8.55878 3.10905 7.04902 4.12065 5.76619C5.13225 4.48336 6.44279 3.46591 7.93 2.80005"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="card-title-modern">Estado de Inventario</h3>
+                <p class="card-subtitle-modern">Por categoría</p>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-card-content">
+            <div id="categories-chart" style="min-height: 240px;">
+              <div class="loading-minimal">
+                <div class="spinner-minimal"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock Bajo -->
+        <div class="dashboard-card-modern">
+          <div class="dashboard-card-header-modern">
+            <div class="card-header-content">
+              <div class="card-icon-header warning">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64151 19.6871 1.81445 19.9905C1.98738 20.2939 2.23675 20.5467 2.53773 20.7239C2.83871 20.9011 3.18082 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.9011 21.4623 20.7239C21.7632 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z"/>
+                  <path d="M12 9V13M12 17H12.01"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="card-title-modern">Alertas de Stock</h3>
+                <p class="card-subtitle-modern">Stock bajo</p>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-card-content" style="max-height: 240px; overflow-y: auto;">
             <div id="low-stock-container">
-              <div class="loading">
-                <div class="spinner"></div>
+              <div class="loading-minimal">
+                <div class="spinner-minimal"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="dashboard-card" style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-          <div style="padding: 20px; border-bottom: 1px solid #f3f4f6;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 2px;">Actividad Reciente</h3>
-            <p style="font-size: 13px; color: #6b7280;">Últimos movimientos de inventario</p>
-          </div>
-          <div style="padding: 16px;">
-            <div id="recent-movements-container">
-              <div class="loading">
-                <div class="spinner"></div>
+        <!-- Resumen Rápido -->
+        <div class="dashboard-card-modern">
+          <div class="dashboard-card-header-modern">
+            <div class="card-header-content">
+              <div class="card-icon-header success">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="card-title-modern">Resumen Rápido</h3>
+                <p class="card-subtitle-modern">Métricas clave</p>
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="dashboard-card" style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-          <div style="padding: 20px; border-bottom: 1px solid #f3f4f6;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 2px;">Resumen General</h3>
-            <p style="font-size: 13px; color: #6b7280;">Datos del sistema</p>
-          </div>
-          <div style="padding: 16px;">
+          <div class="dashboard-card-content">
             <div id="quick-summary-container">
-              <div class="loading">
-                <div class="spinner"></div>
+              <div class="loading-minimal">
+                <div class="spinner-minimal"></div>
               </div>
             </div>
           </div>
@@ -64,30 +159,75 @@ const dashboardView = {
       </div>
     `;
 
+    // Esperar a que ApexCharts esté disponible antes de cargar gráficos
+    await this.waitForApexCharts();
+    
     // Cargar datos
     await Promise.all([
       this.loadStats(),
       this.loadLowStockProducts(),
-      this.loadRecentMovements(),
       this.loadQuickSummary()
     ]);
+    
+    // Cargar gráficos después de que todo el DOM esté listo
+    await Promise.all([
+      this.loadInventoryChart(),
+      this.loadTopProductsChart(),
+      this.loadCategoriesChart()
+    ]);
+  },
+
+  async waitForApexCharts() {
+    // Esperar hasta 3 segundos a que ApexCharts esté disponible
+    const maxAttempts = 30;
+    let attempts = 0;
+    
+    while (typeof ApexCharts === 'undefined' && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    if (typeof ApexCharts === 'undefined') {
+      console.error('ApexCharts no se cargó después de esperar');
+    }
   },
 
   getGreeting() {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
-    return 'Buenas noches';
+    
+    if (hour < 12) {
+      // Mañana - Sol naciente
+      return {
+        text: 'Buenos días',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px; color: #f59e0b;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>'
+      };
+    }
+    
+    if (hour < 19) {
+      // Tarde - Sol
+      return {
+        text: 'Buenas tardes',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px; color: #f59e0b;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      };
+    }
+    
+    // Noche - Luna
+    return {
+      text: 'Buenas noches',
+      icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px; color: #6366f1;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+    };
   },
 
   getCurrentDate() {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('es-ES', options);
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.toLocaleDateString('es-ES', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
   },
 
   async loadStats() {
     try {
-      // Cargar estadísticas
       const [productsRes, inventoryRes, purchaseOrdersRes, salesOrdersRes] = await Promise.all([
         api.getProducts({ limit: 1 }),
         api.getInventoryLevels({ limit: 1 }),
@@ -101,61 +241,53 @@ const dashboardView = {
       const salesOrders = utils.normalizeResponse(salesOrdersRes);
 
       const statsHtml = `
-        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #ff6b2c 0%, #ff8f5c 100%); display: flex; align-items: center; justify-content: center; color: white;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21"/>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <div style="font-size: 13px; color: #6b7280; margin-bottom: 2px;">Productos</div>
-              <div style="font-size: 28px; font-weight: 700; color: #111827;">${products.meta?.total || products.length || 0}</div>
-            </div>
+        <div class="stat-card-minimal gradient-orange">
+          <div class="stat-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21"/>
+            </svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Productos</div>
+            <div class="stat-card-value">${products.meta?.total || products.length || 0}</div>
           </div>
         </div>
 
-        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); display: flex; align-items: center; justify-content: center; color: white;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 3H21V8H3V3ZM3 10H21V15H3V10ZM3 17H21V22H3V17Z"/>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <div style="font-size: 13px; color: #6b7280; margin-bottom: 2px;">Inventario</div>
-              <div style="font-size: 28px; font-weight: 700; color: #111827;">${inventory.meta?.total || (Array.isArray(inventory) ? inventory.length : inventory.data?.length || 0)}</div>
-            </div>
+        <div class="stat-card-minimal gradient-green">
+          <div class="stat-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3H21V8H3V3ZM3 10H21V15H3V10ZM3 17H21V22H3V17Z"/>
+            </svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Inventario</div>
+            <div class="stat-card-value">${inventory.meta?.total || (Array.isArray(inventory) ? inventory.length : inventory.data?.length || 0)}</div>
           </div>
         </div>
 
-        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); display: flex; align-items: center; justify-content: center; color: white;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 7V12M9 12V17M9 12H14M14 12H19M14 12V7M14 12V17"/>
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <div style="font-size: 13px; color: #6b7280; margin-bottom: 2px;">Compras</div>
-              <div style="font-size: 28px; font-weight: 700; color: #111827;">${purchaseOrders.meta?.total || (Array.isArray(purchaseOrders) ? purchaseOrders.length : 0)}</div>
-            </div>
+        <div class="stat-card-minimal gradient-yellow">
+          <div class="stat-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 7V12M9 12V17M9 12H14M14 12H19M14 12V7M14 12V17"/>
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Compras</div>
+            <div class="stat-card-value">${purchaseOrders.meta?.total || (Array.isArray(purchaseOrders) ? purchaseOrders.length : 0)}</div>
           </div>
         </div>
 
-        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); display: flex; align-items: center; justify-content: center; color: white;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 11L12 14L22 4"/>
-                <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16"/>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <div style="font-size: 13px; color: #6b7280; margin-bottom: 2px;">Ventas</div>
-              <div style="font-size: 28px; font-weight: 700; color: #111827;">${salesOrders.meta?.total || (Array.isArray(salesOrders) ? salesOrders.length : 0)}</div>
-            </div>
+        <div class="stat-card-minimal gradient-blue">
+          <div class="stat-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11L12 14L22 4"/>
+              <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16"/>
+            </svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Ventas</div>
+            <div class="stat-card-value">${salesOrders.meta?.total || (Array.isArray(salesOrders) ? salesOrders.length : 0)}</div>
           </div>
         </div>
       `;
@@ -177,32 +309,34 @@ const dashboardView = {
 
       if (products.length === 0) {
         container.innerHTML = `
-          <div class="empty-state-small">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2"/>
-              <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <p>¡Excelente! No hay productos con stock bajo</p>
+          <div class="empty-state-minimal">
+            <div class="empty-icon success">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11L12 14L22 4"/>
+                <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16"/>
+              </svg>
+            </div>
+            <p class="empty-text">¡Excelente! No hay productos con stock bajo</p>
           </div>
         `;
         return;
       }
 
       const html = `
-        <div class="product-list">
+        <div class="dashboard-list">
           ${products.map(product => `
-            <div class="product-item">
-              <div class="product-item-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21" stroke="currentColor" stroke-width="2"/>
+            <div class="dashboard-list-item">
+              <div class="list-item-icon warning">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21"/>
                 </svg>
               </div>
-              <div class="product-item-content">
-                <div class="product-item-name">${utils.escapeHtml(product.name)}</div>
-                <div class="product-item-sku">SKU: ${utils.escapeHtml(product.sku)}</div>
+              <div class="list-item-content">
+                <div class="list-item-title">${utils.escapeHtml(product.name)}</div>
+                <div class="list-item-subtitle">SKU: ${utils.escapeHtml(product.sku)}</div>
               </div>
-              <div class="product-item-badge">
-                <span class="badge danger">Stock: ${utils.formatNumber(product.minStock, 0)}</span>
+              <div class="list-item-badge">
+                <span class="badge-minimal warning">Stock: ${utils.formatNumber(product.minStock, 0)}</span>
               </div>
             </div>
           `).join('')}
@@ -227,20 +361,22 @@ const dashboardView = {
 
       if (movements.length === 0) {
         container.innerHTML = `
-          <div class="empty-state-small">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <p>No hay movimientos recientes</p>
+          <div class="empty-state-minimal">
+            <div class="empty-icon primary">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+              </svg>
+            </div>
+            <p class="empty-text">No hay movimientos recientes</p>
           </div>
         `;
         return;
       }
 
       const typeIcons = {
-        IN: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M12 5L6 11M12 5L18 11" stroke="currentColor" stroke-width="2"/></svg>',
-        OUT: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 19L18 13M12 19L6 13" stroke="currentColor" stroke-width="2"/></svg>',
-        ADJUST: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 6V12M12 12V18M12 12H18M12 12H6" stroke="currentColor" stroke-width="2"/></svg>'
+        IN: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5V19M12 5L6 11M12 5L18 11"/></svg>',
+        OUT: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M12 19L18 13M12 19L6 13"/></svg>',
+        ADJUST: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V12M12 12V18M12 12H18M12 12H6"/></svg>'
       };
 
       const typeColors = {
@@ -256,15 +392,15 @@ const dashboardView = {
       };
 
       const html = `
-        <div class="activity-list">
+        <div class="dashboard-list">
           ${movements.map(movement => `
-            <div class="activity-item">
-              <div class="activity-icon ${typeColors[movement.type]}">
+            <div class="dashboard-list-item">
+              <div class="list-item-icon ${typeColors[movement.type]}">
                 ${typeIcons[movement.type]}
               </div>
-              <div class="activity-content">
-                <div class="activity-title">${typeLabels[movement.type]}</div>
-                <div class="activity-meta">${utils.formatNumber(movement.quantity, 0)} unidades • ${this.getTimeAgo(movement.createdAt)}</div>
+              <div class="list-item-content">
+                <div class="list-item-title">${typeLabels[movement.type]}</div>
+                <div class="list-item-subtitle">${utils.formatNumber(movement.quantity, 0)} unidades • ${this.getTimeAgo(movement.createdAt)}</div>
               </div>
             </div>
           `).join('')}
@@ -294,46 +430,49 @@ const dashboardView = {
       const customers = utils.normalizeResponse(customersRes);
 
       const html = `
-        <div class="summary-list">
-          <div class="summary-item">
-            <div class="summary-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2"/>
-                <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2"/>
+        <div class="dashboard-list">
+          <div class="dashboard-list-item">
+            <div class="list-item-icon info">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"/>
+                <path d="M9 22V12H15V22"/>
               </svg>
             </div>
-            <div class="summary-info">
-              <div class="summary-label">Almacenes</div>
-              <div class="summary-value">${warehouses.meta?.total || 0}</div>
+            <div class="list-item-content">
+              <div class="list-item-title">Almacenes</div>
+              <div class="list-item-subtitle">Total registrados</div>
             </div>
+            <div class="list-item-value">${warehouses.meta?.total || 0}</div>
           </div>
 
-          <div class="summary-item">
-            <div class="summary-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2"/>
-                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+          <div class="dashboard-list-item">
+            <div class="list-item-icon success">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"/>
+                <circle cx="12" cy="7" r="4"/>
               </svg>
             </div>
-            <div class="summary-info">
-              <div class="summary-label">Proveedores</div>
-              <div class="summary-value">${suppliers.meta?.total || 0}</div>
+            <div class="list-item-content">
+              <div class="list-item-title">Proveedores</div>
+              <div class="list-item-subtitle">Total registrados</div>
             </div>
+            <div class="list-item-value">${suppliers.meta?.total || 0}</div>
           </div>
 
-          <div class="summary-item">
-            <div class="summary-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2"/>
-                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
-                <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" stroke-width="2"/>
-                <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="2"/>
+          <div class="dashboard-list-item">
+            <div class="list-item-icon primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13"/>
+                <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88"/>
               </svg>
             </div>
-            <div class="summary-info">
-              <div class="summary-label">Clientes</div>
-              <div class="summary-value">${customers.meta?.total || 0}</div>
+            <div class="list-item-content">
+              <div class="list-item-title">Clientes</div>
+              <div class="list-item-subtitle">Total registrados</div>
             </div>
+            <div class="list-item-value">${customers.meta?.total || 0}</div>
           </div>
         </div>
       `;
@@ -355,6 +494,448 @@ const dashboardView = {
     if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} min`;
     if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} h`;
     return `Hace ${Math.floor(diffInSeconds / 86400)} días`;
+  },
+
+  async loadInventoryChart() {
+    const container = document.querySelector("#inventory-chart");
+    if (!container) return;
+
+    try {
+      // Verificar que ApexCharts esté disponible
+      if (typeof ApexCharts === 'undefined') {
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar librería de gráficos</p></div>';
+        return;
+      }
+
+      // Intentar obtener movimientos
+      let movements = [];
+      try {
+        const response = await api.getStockMovements({ limit: 100, sort: 'createdAt:desc' });
+        const normalized = utils.normalizeResponse(response);
+        movements = normalized.data || [];
+      } catch (apiError) {
+        console.error('Error al obtener movimientos:', apiError);
+        // Continuar con array vacío para mostrar gráfica sin datos
+      }
+
+      // Agrupar movimientos por día (últimos 7 días)
+      const days = [];
+      const entradas = [];
+      const salidas = [];
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+
+      for (let i = 6; i >= 0; i--) {
+        const dayStart = new Date(today);
+        dayStart.setDate(dayStart.getDate() - i);
+        dayStart.setHours(0, 0, 0, 0);
+        
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
+        
+        const dayLabel = dayStart.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+        days.push(dayLabel);
+
+        // Filtrar movimientos de ese día usando rango de fecha
+        const dayMovements = movements.filter(m => {
+          try {
+            const movDate = new Date(m.createdAt);
+            return movDate >= dayStart && movDate <= dayEnd;
+          } catch (e) {
+            return false;
+          }
+        });
+
+        // Contar entradas y salidas
+        const entradasCount = dayMovements
+          .filter(m => m.type === 'IN')
+          .reduce((sum, m) => sum + (parseFloat(m.quantity) || 0), 0);
+        
+        const salidasCount = dayMovements
+          .filter(m => m.type === 'OUT')
+          .reduce((sum, m) => sum + (parseFloat(m.quantity) || 0), 0);
+
+        entradas.push(Math.round(entradasCount));
+        salidas.push(Math.round(salidasCount));
+      }
+
+      const options = {
+        series: [{
+          name: 'Entradas',
+          data: entradas,
+          color: '#10b981'
+        }, {
+          name: 'Salidas',
+          data: salidas,
+          color: '#ef4444'
+        }],
+        chart: {
+          type: 'area',
+          height: 240,
+          toolbar: {
+            show: false
+          },
+          fontFamily: 'Inter, system-ui, sans-serif',
+          animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 600
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 3
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.4,
+            opacityTo: 0.1,
+            stops: [0, 90, 100]
+          }
+        },
+        xaxis: {
+          categories: days,
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontWeight: 500
+            }
+          },
+          axisBorder: {
+            show: false
+          },
+          axisTicks: {
+            show: false
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontWeight: 500
+            },
+            formatter: function (val) {
+              return Math.floor(val);
+            }
+          }
+        },
+        grid: {
+          borderColor: '#f3f4f6',
+          strokeDashArray: 4,
+          xaxis: {
+            lines: {
+              show: false
+            }
+          }
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'right',
+          fontSize: '13px',
+          fontWeight: 600,
+          labels: {
+            colors: '#374151'
+          },
+          markers: {
+            width: 10,
+            height: 10,
+            radius: 10
+          }
+        },
+        tooltip: {
+          theme: 'light',
+          x: {
+            show: true
+          },
+          y: {
+            formatter: function (val) {
+              return val + ' unidades';
+            }
+          }
+        }
+      };
+
+      // Limpiar el contenedor y renderizar
+      container.innerHTML = '';
+      const chart = new ApexCharts(container, options);
+      await chart.render();
+    } catch (error) {
+      console.error('Error al cargar gráfica de inventario:', error);
+      container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar gráfico</p></div>';
+    }
+  },
+
+  async loadTopProductsChart() {
+    const container = document.querySelector("#top-products-chart");
+    if (!container) return;
+
+    try {
+      // Verificar que ApexCharts esté disponible
+      if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts no está cargado');
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar librería de gráficos</p></div>';
+        return;
+      }
+
+      let products = [];
+      try {
+        const response = await api.getProducts({ limit: 5, sort: 'createdAt:desc' });
+        const normalized = utils.normalizeResponse(response);
+        products = normalized.data || [];
+      } catch (apiError) {
+        console.error('Error al obtener productos:', apiError);
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar productos</p></div>';
+        return;
+      }
+
+      if (products.length === 0) {
+        container.innerHTML = '<div class="empty-state-minimal"><div class="empty-icon success"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/></svg></div><p class="empty-text">No hay datos disponibles</p></div>';
+        return;
+      }
+
+      const productNames = products.map(p => {
+        try {
+          return p.name && p.name.length > 20 ? p.name.substring(0, 20) + '...' : (p.name || 'Sin nombre');
+        } catch (e) {
+          return 'Sin nombre';
+        }
+      });
+      
+      const quantities = products.map(p => {
+        try {
+          // Obtener cantidad total de inventario si existe
+          if (p.inventoryLevels && p.inventoryLevels.length > 0) {
+            return Math.round(p.inventoryLevels.reduce((sum, inv) => sum + (parseFloat(inv.quantity) || 0), 0));
+          }
+          return 0;
+        } catch (e) {
+          return 0;
+        }
+      });
+
+      // Si todos los valores son 0, mostrar mensaje
+      if (quantities.every(q => q === 0)) {
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">No hay datos de inventario</p></div>';
+        return;
+      }
+
+      const options = {
+        series: [{
+          name: 'Cantidad',
+          data: quantities,
+          color: '#10b981'
+        }],
+        chart: {
+          type: 'bar',
+          height: 240,
+          toolbar: {
+            show: false
+          },
+          fontFamily: 'Inter, system-ui, sans-serif',
+          animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 600
+          }
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            borderRadius: 6,
+            dataLabels: {
+              position: 'top'
+            }
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          offsetX: 30,
+          style: {
+            fontSize: '12px',
+            fontWeight: 600,
+            colors: ['#10b981']
+          }
+        },
+        xaxis: {
+          categories: productNames,
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontWeight: 500
+            }
+          },
+          axisBorder: {
+            show: false
+          },
+          axisTicks: {
+            show: false
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontWeight: 500
+            }
+          }
+        },
+        grid: {
+          borderColor: '#f3f4f6',
+          strokeDashArray: 4,
+          yaxis: {
+            lines: {
+              show: false
+            }
+          }
+        },
+        tooltip: {
+          theme: 'light',
+          y: {
+            formatter: function (val) {
+              return val + ' unidades';
+            }
+          }
+        }
+      };
+
+      // Limpiar el contenedor y renderizar
+      container.innerHTML = '';
+      const chart = new ApexCharts(container, options);
+      await chart.render();
+    } catch (error) {
+      console.error('Error loading top products chart:', error);
+      container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar gráfico</p></div>';
+    }
+  },
+
+  async loadCategoriesChart() {
+    const container = document.querySelector("#categories-chart");
+    if (!container) return;
+
+    try {
+      // Verificar que ApexCharts esté disponible
+      if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts no está cargado');
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar librería de gráficos</p></div>';
+        return;
+      }
+
+      let categories = [];
+      try {
+        const response = await api.get('/categories');
+        const normalized = utils.normalizeResponse(response);
+        categories = normalized.data || [];
+      } catch (apiError) {
+        console.error('Error al obtener categorías:', apiError);
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar categorías</p></div>';
+        return;
+      }
+
+      if (categories.length === 0) {
+        container.innerHTML = '<div class="empty-state-minimal"><div class="empty-icon info"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89C20.5738 17.3945 19.5788 18.7202 18.3119 19.7513C17.045 20.7824 15.5447 21.4874 13.9424 21.8048C12.3401 22.1221 10.6844 22.0421 9.12012 21.5718C7.55585 21.1015 6.13351 20.2551 4.96931 19.1066C3.80511 17.958 2.93783 16.5428 2.44253 14.984C1.94723 13.4251 1.84094 11.7705 2.13393 10.1646C2.42691 8.55878 3.10905 7.04902 4.12065 5.76619C5.13225 4.48336 6.44279 3.46591 7.93 2.80005"/></svg></div><p class="empty-text">No hay categorías registradas</p></div>';
+        return;
+      }
+
+      const categoryNames = categories.slice(0, 6).map(c => c.name || 'Sin nombre');
+      const productCounts = categories.slice(0, 6).map(c => {
+        try {
+          return c._count?.products || 0;
+        } catch (e) {
+          return 0;
+        }
+      });
+
+      // Si todos los valores son 0, mostrar mensaje
+      if (productCounts.every(q => q === 0)) {
+        container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">No hay productos en categorías</p></div>';
+        return;
+      }
+
+      const options = {
+        series: productCounts,
+        chart: {
+          type: 'donut',
+          height: 240,
+          fontFamily: 'Inter, system-ui, sans-serif',
+          animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800
+          }
+        },
+        labels: categoryNames,
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+        plotOptions: {
+          pie: {
+            donut: {
+              size: '65%',
+              labels: {
+                show: true,
+                total: {
+                  show: true,
+                  label: 'Total',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#6b7280',
+                  formatter: function (w) {
+                    return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                  }
+                },
+                value: {
+                  fontSize: '22px',
+                  fontWeight: 700,
+                  color: '#111827',
+                  formatter: function (val) {
+                    return val;
+                  }
+                }
+              }
+            }
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        legend: {
+          position: 'bottom',
+          fontSize: '12px',
+          fontWeight: 500,
+          labels: {
+            colors: '#374151'
+          },
+          markers: {
+            width: 10,
+            height: 10,
+            radius: 10
+          }
+        },
+        tooltip: {
+          theme: 'light',
+          y: {
+            formatter: function (val) {
+              return val + ' productos';
+            }
+          }
+        }
+      };
+
+      // Limpiar el contenedor y renderizar
+      container.innerHTML = '';
+      const chart = new ApexCharts(container, options);
+      await chart.render();
+    } catch (error) {
+      console.error('Error loading categories chart:', error);
+      container.innerHTML = '<div class="empty-state-minimal"><p class="empty-text">Error al cargar gráfico</p></div>';
+    }
   }
 };
 
