@@ -16,7 +16,8 @@ function createWindow() {
     },
     backgroundColor: '#FFFFFF',
     autoHideMenuBar: true,
-    icon: path.join(__dirname, 'assets', 'icon.png')
+    title: 'Inventia',
+    icon: path.join(__dirname, 'build', 'icon.ico')
   });
 
   mainWindow.loadFile('index.html');
