@@ -436,7 +436,7 @@ const productsView = {
             <button class="modal-close" onclick="document.getElementById('product-modal').remove()">×</button>
           </div>
           <form id="product-form">
-            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+            <div class="modal-body">
               <div class="form-group">
                 <label>Nombre *</label>
                 <input type="text" name="name" id="product-name" required 
@@ -466,7 +466,7 @@ const productsView = {
               
               <div class="form-group">
                 <label>Descripción</label>
-                <textarea name="description" rows="3" placeholder="Descripción del producto (opcional)">${product?.description || ''}</textarea>
+                <textarea name="description" rows="2" placeholder="Descripción del producto (opcional)">${product?.description || ''}</textarea>
               </div>
               
               <div class="grid grid-2" style="gap: 16px;">
@@ -493,7 +493,7 @@ const productsView = {
                 </div>
               </div>
               
-              <div class="form-group">
+              <div class="form-group" style="margin-bottom: 0;">
                 <label>Stock Mínimo</label>
                 <input type="number" name="minStock" step="1" min="0" 
                        value="${product?.minStock || ''}" 
@@ -630,7 +630,9 @@ const productsView = {
   async deleteProduct(id) {
     const confirmed = await utils.confirm(
       'Esta acción no se puede deshacer. El producto será eliminado permanentemente.',
-      '¿Eliminar producto?'
+      '¿Eliminar producto?',
+      'danger',
+      'Eliminar'
     );
 
     if (!confirmed) return;

@@ -613,7 +613,8 @@ const settingsView = {
     const confirmed = await utils.confirm(
       'Esta acción no se puede deshacer. La categoría será eliminada permanentemente.',
       'Eliminar Categoría',
-      'danger'
+      'danger',
+      'Eliminar'
     );
     if (!confirmed) return;
 
@@ -634,7 +635,8 @@ const settingsView = {
     const confirmed = await utils.confirm(
       'El almacén será marcado como eliminado. No afectará el historial de inventario existente.',
       'Eliminar Almacén',
-      'danger'
+      'danger',
+      'Eliminar'
     );
     if (!confirmed) return;
 
@@ -655,7 +657,8 @@ const settingsView = {
     const confirmed = await utils.confirm(
       'El usuario será marcado como eliminado y no podrá acceder al sistema. Su historial de actividades se conservará.',
       'Eliminar Usuario',
-      'danger'
+      'danger',
+      'Eliminar'
     );
     if (!confirmed) return;
 

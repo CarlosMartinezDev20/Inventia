@@ -202,7 +202,7 @@ const suppliersView = {
   },
 
   async deleteSupplier(id) {
-    const confirmed = await utils.confirm('¿Eliminar este proveedor?', '¿Estás seguro?');
+    const confirmed = await utils.confirm('¿Eliminar este proveedor?', '¿Estás seguro?', 'danger', 'Eliminar');
     if (!confirmed) return;
 
     try {

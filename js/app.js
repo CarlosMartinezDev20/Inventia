@@ -26,11 +26,6 @@ class App {
     const loginScreen = document.getElementById('login-screen');
     const appScreen = document.getElementById('app-screen');
 
-    // Siempre cerrar sesión al iniciar la app
-    if (!this.initialized) {
-      auth.logout();
-    }
-
     if (auth.isAuthenticated()) {
       // Mostrar aplicación
       loginScreen.classList.remove('active');
@@ -61,15 +56,23 @@ class App {
       loginScreen.classList.add('active');
       // Limpiar hash
       if (window.location.hash) window.location.hash = '';
-      // Reenfocar login
+      
+      // SOLO auto-completar credenciales si el usuario había marcado "Recordarme"
+      // NO hacer login automático, solo rellenar los campos
+      const remembered = auth.getRememberedCredentials();
       const loginForm = document.getElementById('login-form');
       const emailInput = loginForm?.querySelector('#email');
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          emailInput?.focus();
-          emailInput?.select?.();
-        }, 0);
-      });
+      const passwordInput = loginForm?.querySelector('#password');
+      const rememberCheckbox = loginForm?.querySelector('#remember-session');
+      
+      // Solo rellenar si existe la preferencia guardada
+      if (remembered && remembered.email && rememberCheckbox) {
+        emailInput.value = remembered.email;
+        passwordInput.value = remembered.password;
+        rememberCheckbox.checked = true;
+      }
+      
+      // NO hacer autofocus - dejar que el usuario haga clic cuando quiera
     }
   }
 
@@ -118,7 +121,7 @@ class App {
         logoutBtn.removeEventListener('click', this.handleLogoutBound);
       }
       this.handleLogoutBound = async () => {
-        const ok = await utils.confirm('¿Deseas cerrar sesión?', 'Cerrar sesión');
+        const ok = await utils.confirm('¿Deseas cerrar sesión?', 'Cerrar sesión', 'warning', 'Cerrar sesión');
         if (ok) {
           auth.logout();
           this.checkAuth();
@@ -135,7 +138,7 @@ class App {
       if (e.ctrlKey && e.shiftKey && e.key === 'L') {
         e.preventDefault();
         if (auth.isAuthenticated()) {
-          const ok = await utils.confirm('¿Deseas cerrar sesión?', 'Cerrar sesión');
+          const ok = await utils.confirm('¿Deseas cerrar sesión?', 'Cerrar sesión', 'warning', 'Cerrar sesión');
           if (ok) {
             auth.logout();
             this.checkAuth();
@@ -146,10 +149,44 @@ class App {
     document.addEventListener('keydown', this.keydownBound);
   }
 
+  // Auto login con credenciales guardadas
+  async autoLogin(email, password) {
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+
+    try {
+      await auth.login(email, password, true);
+      
+      const user = auth.getCurrentUser();
+      if (user) {
+        const nameEl = document.getElementById('user-name');
+        const roleEl = document.getElementById('user-role');
+        if (nameEl) nameEl.textContent = user.fullName || '';
+        if (roleEl) roleEl.textContent = permissions.getRoleLabel(user.role) || user.role;
+      }
+
+      // Mostrar app
+      loginScreen.classList.remove('active');
+      appScreen.classList.add('active');
+      permissions.applyViewPermissions();
+      router.navigate('dashboard');
+
+      console.log('Auto-login exitoso');
+    } catch (error) {
+      console.error('Auto-login falló:', error);
+      // Si falla, limpiar credenciales y mostrar login normal
+      auth.clearRememberedCredentials();
+      auth.logout();
+      appScreen.classList.remove('active');
+      loginScreen.classList.add('active');
+    }
+  }
+
   // Manejar login
   async handleLogin(form) {
     const email = form.email.value;
     const password = form.password.value;
+    const rememberSession = form.rememberSession?.checked || false;
     const submitBtn = form.querySelector('button[type="submit"]');
     const emailInput = form.email;
     const passwordInput = form.password;
@@ -168,7 +205,7 @@ class App {
     submitBtn.innerHTML = '<div class="btn-spinner"></div> Iniciando sesión...';
 
     try {
-      await auth.login(email, password);
+      await auth.login(email, password, rememberSession);
 
       const user = auth.getCurrentUser();
       if (user) {
@@ -268,4 +305,90 @@ window.app = new App();
 // DOM listo
 document.addEventListener('DOMContentLoaded', () => {
   window.app.init();
+  initMobileMenu();
 });
+
+// Funcionalidad de menú móvil
+function initMobileMenu() {
+  // Crear botón de menú móvil si no existe
+  if (!document.querySelector('.mobile-menu-toggle')) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'mobile-menu-toggle';
+    toggleBtn.setAttribute('aria-label', 'Abrir menú');
+    toggleBtn.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12h18M3 6h18M3 18h18"/>
+      </svg>
+    `;
+    document.body.appendChild(toggleBtn);
+  }
+
+  // Crear backdrop si no existe
+  if (!document.querySelector('.sidebar-backdrop')) {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  const sidebar = document.querySelector('.sidebar');
+  const toggleBtn = document.querySelector('.mobile-menu-toggle');
+  const backdrop = document.querySelector('.sidebar-backdrop');
+
+  if (!sidebar || !toggleBtn || !backdrop) return;
+
+  // Toggle menú
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.contains('open');
+    
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      openMobileMenu();
+    }
+  });
+
+  // Cerrar con backdrop
+  backdrop.addEventListener('click', closeMobileMenu);
+
+  // Cerrar al hacer clic en un link del menú
+  const navItems = sidebar.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 1024) {
+        closeMobileMenu();
+      }
+    });
+  });
+
+  // Cerrar con tecla ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+      closeMobileMenu();
+    }
+  });
+
+  function openMobileMenu() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    toggleBtn.setAttribute('aria-label', 'Cerrar menú');
+  }
+
+  function closeMobileMenu() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('show');
+    document.body.style.overflow = '';
+    toggleBtn.setAttribute('aria-label', 'Abrir menú');
+  }
+
+  // Cerrar menú al cambiar de tamaño de pantalla
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (window.innerWidth > 1024) {
+        closeMobileMenu();
+      }
+    }, 250);
+  });
+}

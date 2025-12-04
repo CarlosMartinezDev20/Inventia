@@ -131,7 +131,7 @@ const utils = {
   },
 
   // Confirmar acción
-  async confirm(message, title = '¿Estás seguro?', type = 'warning') {
+  async confirm(message, title = '¿Estás seguro?', type = 'warning', confirmText = 'Confirmar') {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay confirm-modal-overlay';
@@ -153,6 +153,31 @@ const utils = {
       
       const icon = type === 'danger' ? icons.danger : icons.warning;
       
+      // Determinar el ícono del botón según el texto
+      let buttonIcon = '';
+      if (confirmText.toLowerCase().includes('eliminar')) {
+        buttonIcon = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M19 6V20C19 21.1046 18.1046 22 17 22H7C5.89543 22 5 21.1046 5 20V6M8 6V4C8 2.89543 8.89543 2 10 2H14C15.1046 2 16 2.89543 16 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+      } else if (confirmText.toLowerCase().includes('cerrar')) {
+        buttonIcon = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+      } else {
+        buttonIcon = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+      }
+      
       overlay.innerHTML = `
         <div class="modal modal-sm confirm-modal">
           <div class="modal-body confirm-modal-body">
@@ -165,11 +190,8 @@ const utils = {
           <div class="modal-footer confirm-modal-footer">
             <button class="btn btn-secondary" id="cancel-btn">Cancelar</button>
             <button class="btn btn-danger" id="confirm-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M19 6V20C19 21.1046 18.1046 22 17 22H7C5.89543 22 5 21.1046 5 20V6M8 6V4C8 2.89543 8.89543 2 10 2H14C15.1046 2 16 2.89543 16 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Eliminar
+              ${buttonIcon}
+              ${confirmText}
             </button>
           </div>
         </div>

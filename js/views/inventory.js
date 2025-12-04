@@ -14,17 +14,22 @@ const inventoryView = {
 
     container.innerHTML = `
       <div class="page-header">
-        <div>
-          <h1 class="page-title">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 8px; color: var(--primary);">
-              <path d="M3 3H21V8H3V3ZM3 10H21V15H3V10ZM3 17H21V22H3V17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <div class="page-header-content">
+          <div class="page-header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="2" width="9" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+              <rect x="2" y="13" width="9" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+              <rect x="13" y="2" width="9" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+              <rect x="13" y="13" width="9" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
             </svg>
-            Inventario
-          </h1>
-          <p class="page-subtitle">Control de stock por producto y almacén</p>
+          </div>
+          <div>
+            <h1 class="page-title">Inventario</h1>
+            <p class="page-subtitle">Control de stock por producto y almacén</p>
+          </div>
         </div>
         <div class="page-actions">
-          ${auth.canManage() ? '<button class="btn btn-primary" id="adjust-inventory-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 6V12M12 12V18M12 12H18M12 12H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Ajustar Inventario</button>' : ''}
+          ${auth.canManage() ? '<button class="btn btn-primary" id="adjust-inventory-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> Ajustar Inventario</button>' : ''}
         </div>
       </div>
 
@@ -216,7 +221,7 @@ const inventoryView = {
       filtered = filtered.filter(item => {
         const quantity = parseInt(item.quantity || 0);
         const minStock = parseInt(item.product?.minStock || 0);
-        const isLow = quantity <= minStock;
+        const isLow = quantity < minStock;
         
         const match = this.currentFilters.stockStatus === 'low' ? isLow : !isLow;
         return match;
@@ -248,54 +253,57 @@ const inventoryView = {
 
     const totalProducts = new Set(data.map(item => item.productId)).size;
     const totalQuantity = data.reduce((sum, item) => sum + parseInt(item.quantity), 0);
-    const lowStock = data.filter(item => parseInt(item.quantity) <= parseInt(item.product?.minStock || 0)).length;
+    const lowStock = data.filter(item => parseInt(item.quantity) < parseInt(item.product?.minStock || 0)).length;
     const totalLocations = data.length;
 
     container.innerHTML = `
-      <div class="stat-card-modern">
-        <div class="stat-icon-wrapper stat-icon-blue">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M20 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 7.9 21.1 7 20 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M16 21V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+      <div class="inv-stat-card">
+        <div class="inv-stat-body">
+          <div class="inv-stat-label">Productos</div>
+          <div class="inv-stat-value">${totalProducts}</div>
         </div>
-        <div class="stat-content-modern">
-          <div class="stat-label-modern">Productos</div>
-          <div class="stat-value-modern">${totalProducts}</div>
+        <div class="inv-stat-icon" style="background: #EFF6FF; color: #3B82F6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
         </div>
       </div>
-      <div class="stat-card-modern">
-        <div class="stat-icon-wrapper stat-icon-purple">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M21 10H3M16 2V6M8 2V6M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+      <div class="inv-stat-card">
+        <div class="inv-stat-body">
+          <div class="inv-stat-label">Ubicaciones</div>
+          <div class="inv-stat-value">${totalLocations}</div>
         </div>
-        <div class="stat-content-modern">
-          <div class="stat-label-modern">Ubicaciones</div>
-          <div class="stat-value-modern">${totalLocations}</div>
+        <div class="inv-stat-icon" style="background: #F5F3FF; color: #8B5CF6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z"/>
+          </svg>
         </div>
       </div>
-      <div class="stat-card-modern">
-        <div class="stat-icon-wrapper stat-icon-orange">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M16 8V5L19 2L20 3L23 4L20 7H17V10L16 8ZM2 12H4V22H2V12ZM6 10H8V22H6V10ZM10 6H12V22H10V6ZM14 13H16V22H14V13Z" fill="currentColor"/>
-          </svg>
+      <div class="inv-stat-card">
+        <div class="inv-stat-body">
+          <div class="inv-stat-label">Total en Stock</div>
+          <div class="inv-stat-value">${utils.formatNumber(totalQuantity, 0)}</div>
         </div>
-        <div class="stat-content-modern">
-          <div class="stat-label-modern">Unidades Totales</div>
-          <div class="stat-value-modern">${utils.formatNumber(totalQuantity, 0)}</div>
+        <div class="inv-stat-icon" style="background: #FFF7ED; color: #F97316;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8C21 7.65 20.91 7.3 20.73 7C20.56 6.7 20.3 6.45 20 6.27L13 2.27C12.7 2.09 12.35 2 12 2C11.65 2 11.3 2.09 11 2.27L4 6.27C3.7 6.45 3.44 6.7 3.27 7C3.09 7.3 3 7.65 3 8V16C3 16.35 3.09 16.7 3.27 17C3.44 17.3 3.7 17.55 4 17.73L11 21.73C11.3 21.91 11.65 22 12 22C12.35 22 12.7 21.91 13 21.73L20 17.73C20.3 17.55 20.56 17.3 20.73 17C20.91 16.7 21 16.35 21 16Z"/>
+          </svg>
         </div>
       </div>
-      <div class="stat-card-modern ${lowStock > 0 ? 'stat-warning-modern' : 'stat-success-modern'}">
-        <div class="stat-icon-wrapper ${lowStock > 0 ? 'stat-icon-red' : 'stat-icon-green'}">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64151 19.6871 1.81445 19.9905C1.98738 20.2939 2.23675 20.5467 2.53773 20.7239C2.83871 20.9011 3.18082 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.9011 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 9V13M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+      <div class="inv-stat-card ${lowStock > 0 ? 'inv-stat-alert' : 'inv-stat-success'}">
+        <div class="inv-stat-body">
+          <div class="inv-stat-label">${lowStock > 0 ? 'Alertas de Stock' : 'Todo en Orden'}</div>
+          <div class="inv-stat-value">${lowStock}</div>
         </div>
-        <div class="stat-content-modern">
-          <div class="stat-label-modern">Stock Bajo</div>
-          <div class="stat-value-modern">${lowStock}</div>
+        <div class="inv-stat-icon" style="background: ${lowStock > 0 ? '#FEF2F2' : '#F0FDF4'}; color: ${lowStock > 0 ? '#EF4444' : '#22C55E'};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            ${lowStock > 0 ? 
+              '<path d="M12 9V13M12 17H12.01M10.29 3.86L1.82 18C1.55 18.45 1.55 19 1.82 19.45C2.09 19.9 2.59 20.17 3.12 20.17H20.88C21.41 20.17 21.91 19.9 22.18 19.45C22.45 19 22.45 18.45 22.18 18L13.71 3.86C13.44 3.41 12.94 3.14 12.41 3.14C11.88 3.14 11.38 3.41 11.11 3.86H10.29Z"/>' :
+              '<path d="M9 12L11 14L15 10M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"/>'}
+          </svg>
         </div>
       </div>
     `;
@@ -340,74 +348,66 @@ const inventoryView = {
           const isExpanded = this.expandedProducts.has(productId);
           const totalQty = productData.totalQuantity;
           const minStock = productData.product?.minStock || 0;
-          const isLowOverall = totalQty <= minStock;
+          const isLowOverall = totalQty < minStock;
           
           return `
-            <div class="inventory-card-modern ${isExpanded ? 'expanded' : ''}">
-              <div class="inventory-card-header" onclick="inventoryView.toggleProduct('${productId}')">
-                <div class="product-info-section">
-                  <div class="expand-button">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="expand-icon-svg ${isExpanded ? 'rotated' : ''}">
+            <div class="inv-product-card">
+              <div class="inv-product-header" onclick="inventoryView.toggleProduct('${productId}')">
+                <div class="inv-product-title">
+                  <div class="inv-product-name">${utils.escapeHtml(productData.product?.name || 'N/A')}</div>
+                  <div class="inv-product-sku">${utils.escapeHtml(productData.product?.sku || 'N/A')}</div>
+                </div>
+                <div class="inv-product-actions">
+                  ${isLowOverall ? '<span class="inv-stock-badge low">⚠ Stock Bajo</span>' : '<span class="inv-stock-badge ok">✓ En Stock</span>'}
+                  <button class="inv-expand-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="inv-expand-icon ${isExpanded ? 'rotated' : ''}">
                       <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                  </div>
-                  <div class="product-details">
-                    <div class="product-name-modern">${utils.escapeHtml(productData.product?.name || 'N/A')}</div>
-                    <div class="product-sku-modern">SKU: ${utils.escapeHtml(productData.product?.sku || 'N/A')}</div>
-                  </div>
-                </div>
-                <div class="product-metrics">
-                  <div class="metric-item">
-                    <span class="metric-label">TOTAL</span>
-                    <span class="metric-value ${isLowOverall ? 'metric-warning' : 'metric-success'}">${utils.formatNumber(totalQty, 0)}</span>
-                  </div>
-                  <div class="metric-divider"></div>
-                  <div class="metric-item">
-                    <span class="metric-label">STOCK MÍN</span>
-                    <span class="metric-value">${utils.formatNumber(minStock, 0)}</span>
-                  </div>
-                  <div class="metric-divider"></div>
-                  <div class="metric-item">
-                    <span class="metric-label">ALMACENES</span>
-                    <span class="metric-value">${productData.warehouses.length}</span>
-                  </div>
-                  <div class="metric-badge">
-                    ${isLowOverall ? '<span class="badge danger">Stock Bajo</span>' : '<span class="badge success">OK</span>'}
-                  </div>
+                    ${isExpanded ? 'Ocultar' : 'Ver'}
+                  </button>
                 </div>
               </div>
               
               ${isExpanded ? `
-                <div class="warehouses-detail-section">
-                  <div class="warehouses-grid">
+                <div class="inv-product-body active">
+                  <div class="inv-metrics">
+                    <div class="inv-metric">
+                      <div class="inv-metric-value ${isLowOverall ? 'warning' : 'success'}">${utils.formatNumber(totalQty, 0)}</div>
+                      <div class="inv-metric-label">Stock Total</div>
+                    </div>
+                    <div class="inv-metric">
+                      <div class="inv-metric-value">${utils.formatNumber(minStock, 0)}</div>
+                      <div class="inv-metric-label">Mínimo</div>
+                    </div>
+                    <div class="inv-metric">
+                      <div class="inv-metric-value">${productData.warehouses.length}</div>
+                      <div class="inv-metric-label">Almacenes</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="inv-warehouses-section">
+                  <div class="inv-warehouses-grid">
                     ${productData.warehouses.map(wh => {
-                      const isLow = parseInt(wh.quantity) <= minStock;
+                      const isLow = parseInt(wh.quantity) < minStock;
                       return `
-                        <div class="warehouse-card-mini ${isLow ? 'warehouse-low' : 'warehouse-ok'}">
-                          <div class="warehouse-header-mini">
-                            <div class="warehouse-icon">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                              </svg>
-                            </div>
-                            <div class="warehouse-name-mini">${utils.escapeHtml(wh.warehouse?.name || 'N/A')}</div>
+                        <div class="inv-warehouse-card ${isLow ? 'low-stock' : ''}">
+                          <div class="inv-warehouse-header">
+                            <span class="inv-warehouse-name">${utils.escapeHtml(wh.warehouse?.name || 'N/A')}</span>
+                            ${isLow ? '<div class="inv-warehouse-alert"></div>' : ''}
                           </div>
-                          <div class="warehouse-body-mini">
-                            <div class="warehouse-quantity-display">
-                              <span class="quantity-number">${utils.formatNumber(wh.quantity, 0)}</span>
-                              <span class="quantity-label">unidades</span>
-                            </div>
-                            <div class="warehouse-status-badge">
-                              ${isLow ? '<span class="badge danger">Stock Bajo</span>' : '<span class="badge success">OK</span>'}
-                            </div>
+                          <div class="inv-warehouse-qty">
+                            <div class="inv-qty-number">${utils.formatNumber(wh.quantity, 0)}</div>
+                            <div class="inv-qty-label">unidades</div>
                           </div>
                           ${auth.canManage() ? 
-                            `<button class="btn-adjust-mini" onclick="inventoryView.showAdjustModal('${productId}', '${wh.warehouseId}')">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 6V12M12 12V18M12 12H18M12 12H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                              </svg>
-                              Ajustar
-                            </button>` : ''
+                            `<div class="inv-warehouse-action">
+                              <button class="inv-adjust-btn" onclick="inventoryView.showAdjustModal('${productId}', '${wh.warehouseId}')">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5V19M5 12H19"/>
+                                  </svg>
+                                  Ajustar
+                                </button>
+                              </div>` : ''
                           }
                         </div>
                       `;

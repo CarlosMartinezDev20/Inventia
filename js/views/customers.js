@@ -187,7 +187,7 @@ const customersView = {
   },
 
   async deleteCustomer(id) {
-    const confirmed = await utils.confirm('¿Eliminar este cliente?', '¿Estás seguro?');
+    const confirmed = await utils.confirm('¿Eliminar este cliente?', '¿Estás seguro?', 'danger', 'Eliminar');
     if (!confirmed) return;
 
     try {
