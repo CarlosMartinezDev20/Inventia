@@ -146,7 +146,7 @@ const salesOrdersView = {
                       </svg>
                     </button>
                     ${order.status === 'DRAFT' && auth.canManage() ? `
-                      <button class="action-btn edit" onclick="salesOrdersView.confirmOrder('${order.id}')">Confirmar</button>
+                      <button class="action-btn edit" onclick="salesOrdersView.fulfillOrder('${order.id}')">Completar</button>
                     ` : ''}
                     ${order.status === 'CONFIRMED' && auth.canManage() ? `
                       <button class="action-btn" onclick="salesOrdersView.fulfillOrder('${order.id}')">Completar</button>
