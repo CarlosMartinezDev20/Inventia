@@ -290,6 +290,7 @@ class App {
       'sales-orders': window.salesOrdersView,
       customers: window.customersView,
       suppliers: window.suppliersView,
+      finances: window.financesView,
       settings: window.settingsView,
     };
 

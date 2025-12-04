@@ -4,7 +4,7 @@ class PermissionsManager {
     // Definición de permisos por rol
     this.rolePermissions = {
       ADMIN: {
-        views: ['dashboard', 'products', 'inventory', 'purchase-orders', 'sales-orders', 'customers', 'suppliers', 'settings'],
+        views: ['dashboard', 'products', 'inventory', 'purchase-orders', 'sales-orders', 'customers', 'suppliers', 'finances', 'settings'],
         actions: {
           products: ['create', 'read', 'update', 'delete'],
           inventory: ['create', 'read', 'update', 'delete', 'adjust'],
@@ -12,11 +12,12 @@ class PermissionsManager {
           'sales-orders': ['create', 'read', 'update', 'delete', 'fulfill'],
           customers: ['create', 'read', 'update', 'delete'],
           suppliers: ['create', 'read', 'update', 'delete'],
+          finances: ['create', 'read', 'update', 'delete', 'view-dashboard'],
           settings: ['manage-categories', 'manage-warehouses', 'manage-users'],
         }
       },
       MANAGER: {
-        views: ['dashboard', 'products', 'inventory', 'purchase-orders', 'sales-orders', 'customers', 'suppliers'],
+        views: ['dashboard', 'products', 'inventory', 'purchase-orders', 'sales-orders', 'customers', 'suppliers', 'finances'],
         actions: {
           products: ['create', 'read', 'update'],
           inventory: ['read', 'adjust'],
@@ -24,6 +25,7 @@ class PermissionsManager {
           'sales-orders': ['create', 'read', 'update', 'fulfill'],
           customers: ['create', 'read', 'update'],
           suppliers: ['create', 'read', 'update'],
+          finances: ['create', 'read', 'view-dashboard'],
         }
       },
       CLERK: {
