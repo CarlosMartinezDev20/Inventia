@@ -3,8 +3,14 @@ const purchaseOrdersView = {
   suppliers: [],
   warehouses: [],
   products: [],
+  isRendered: false,
 
   async render(container) {
+    // Si ya fue renderizada, solo recargar órdenes
+    if (this.isRendered) {
+      await this.loadOrders();
+      return;
+    }
     await Promise.all([
       this.loadSuppliers(),
       this.loadWarehouses(),
@@ -39,6 +45,7 @@ const purchaseOrdersView = {
       </div>
     `;
 
+    this.isRendered = true;
     document.getElementById('add-po-btn')?.addEventListener('click', () => this.showPOModal());
     await this.loadOrders();
   },
